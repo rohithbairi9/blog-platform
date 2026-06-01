@@ -1,6 +1,6 @@
 // src/controllers/user.controller.ts
 
-import { Response } from "express";
+import { Request, Response } from "express";
 
 import asyncHandler from "../utils/asyncHandler";
 import { AuthRequest } from "../types/auth.types";
@@ -76,5 +76,33 @@ export const makeAdmin =
         message: "User promoted to ADMIN",
         user,
       });
+    }
+  );
+
+export const getUserById =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+const user = await prisma.user.findUnique({
+  where: {
+    id: String(req.params.id),
+  },
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+    createdAt: true,
+  },
+});
+
+if (!user) {
+  return res.status(404).json({
+    success: false,
+    message: "User not found",
+  });
+}
     }
   );

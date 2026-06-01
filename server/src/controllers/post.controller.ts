@@ -58,6 +58,8 @@ import { PostQuery } from "../types/post.types";
 
 import AppError from "../utils/AppError";
 
+import prisma from "../config/prisma";
+
 export const createPost = asyncHandler(
   async (
     req: AuthRequest,
@@ -112,6 +114,31 @@ export const getPostBySlug =
       const slug = String(req.params.slug);
 
       const post = await incrementPostViewsService(slug);
+
+      if (!post) {
+        throw new AppError(
+          "Post not found",
+          404
+        );
+      }
+
+      return res.status(200).json({
+        success: true,
+        post,
+      });
+    }
+  );
+
+export const getPostById =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const post =
+        await getPostByIdService(
+          String(req.params.id)
+        );
 
       if (!post) {
         throw new AppError(
@@ -217,6 +244,30 @@ export const deletePost =
         success: true,
         message:
           "Post deleted successfully",
+      });
+    }
+  );
+
+export const getMyPosts =
+  asyncHandler(
+    async (
+      req: AuthRequest,
+      res: Response
+    ) => {
+      const posts =
+        await prisma.post.findMany({
+          where: {
+            authorId: req.userId!,
+          },
+
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+      res.status(200).json({
+        success: true,
+        posts,
       });
     }
   );

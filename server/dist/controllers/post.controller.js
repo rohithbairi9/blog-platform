@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePost = exports.updatePost = exports.getPostBySlug = exports.getAllPosts = exports.createPost = void 0;
+exports.deletePost = exports.updatePost = exports.getPostById = exports.getPostBySlug = exports.getAllPosts = exports.createPost = void 0;
 const post_validator_1 = require("../validators/post.validator");
 const asyncHandler_1 = __importDefault(require("../utils/asyncHandler"));
 const post_service_1 = require("../services/post.service");
@@ -34,6 +34,16 @@ exports.getAllPosts = (0, asyncHandler_1.default)(async (req, res) => {
 exports.getPostBySlug = (0, asyncHandler_1.default)(async (req, res) => {
     const slug = String(req.params.slug);
     const post = await (0, post_service_1.incrementPostViewsService)(slug);
+    if (!post) {
+        throw new AppError_1.default("Post not found", 404);
+    }
+    return res.status(200).json({
+        success: true,
+        post,
+    });
+});
+exports.getPostById = (0, asyncHandler_1.default)(async (req, res) => {
+    const post = await (0, post_service_1.getPostByIdService)(String(req.params.id));
     if (!post) {
         throw new AppError_1.default("Post not found", 404);
     }

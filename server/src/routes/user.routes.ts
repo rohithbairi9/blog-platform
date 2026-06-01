@@ -10,6 +10,7 @@ import { makeAdmin } from "../controllers/user.controller";
 import {
   getProfile,
   updateProfile,
+  getUserById,
 } from "../controllers/user.controller";
 
 import adminMiddleware from "../middlewares/admin.middleware";
@@ -26,6 +27,11 @@ router.put(
   "/profile",
   authMiddleware,
   updateProfile
+);
+
+router.get(
+  "/:id",
+  getUserById
 );
 
 router.put(

@@ -6,6 +6,8 @@ import {
   createPost,
   getAllPosts,
   getPostBySlug,
+  getPostById,
+  getMyPosts,
   updatePost,
   deletePost,
 } from "../controllers/post.controller";
@@ -16,7 +18,19 @@ from "../controllers/comment.controller";
 const router = Router();
 
 router.get("/", getAllPosts);
+router.get(
+  "/my-posts",
+  authMiddleware,
+  getMyPosts
+);
 router.get("/:postId/comments", getCommentsByPost);
+router.get("/:slug", getPostBySlug);
+router.get("/", getAllPosts);
+
+router.get("/id/:id", getPostById);
+
+router.get("/:postId/comments", getCommentsByPost);
+
 router.get("/:slug", getPostBySlug);
 
 router.post(
