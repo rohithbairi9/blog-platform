@@ -52,26 +52,31 @@ return prisma.post.create({
 export const getAllPostsService = async (
   page: number,
   limit: number,
-  search?: string
+  search?: string,
+  category?: string
 ) => {
   const skip = (page - 1) * limit;
 
-  const where = search
-    ? {
-        OR: [
-          {
-            title: {
-              contains: search,
-            },
-          },
-          {
-            content: {
-              contains: search,
-            },
-          },
-        ],
-      }
-    : {};
+const where: any = {};
+
+if (search) {
+  where.OR = [
+    {
+      title: {
+        contains: search,
+      },
+    },
+    {
+      content: {
+        contains: search,
+      },
+    },
+  ];
+}
+
+if (category) {
+  where.category = category;
+}
 
   const posts = await prisma.post.findMany({
     where,
@@ -186,6 +191,37 @@ export const incrementPostViewsService =
             email: true,
           },
         },
+      },
+    });
+  };
+
+export const getRelatedPostsService =
+  async (
+    postId: string,
+    category?: string
+  ) => {
+    return prisma.post.findMany({
+      where: {
+        id: {
+          not: postId,
+        },
+
+        category,
+      },
+
+      take: 3,
+
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "desc",
       },
     });
   };

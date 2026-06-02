@@ -52,6 +52,7 @@ import {
   updatePostService,
   deletePostService,
   incrementPostViewsService,
+  getRelatedPostsService,
 } from "../services/post.service";
 
 import { PostQuery } from "../types/post.types";
@@ -92,12 +93,16 @@ export const getAllPosts =
     const search =
       req.query.search as string;
 
+    const category =
+  req.query.category as string;
+
     const result =
       await getAllPostsService(
-        page,
-        limit,
-        search
-      );
+  page,
+  limit,
+  search,
+  category
+);
 
     res.status(200).json({
       success: true,
@@ -264,6 +269,31 @@ export const getMyPosts =
             createdAt: "desc",
           },
         });
+
+      res.status(200).json({
+        success: true,
+        posts,
+      });
+    }
+  );
+
+export const getRelatedPosts =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const postId =
+        String(req.params.postId);
+
+      const category =
+        req.query.category as string;
+
+      const posts =
+        await getRelatedPostsService(
+          postId,
+          category
+        );
 
       res.status(200).json({
         success: true,

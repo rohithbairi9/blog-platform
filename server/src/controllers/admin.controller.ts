@@ -48,6 +48,52 @@ const mostViewedPost =
     },
   });
 
+  const categoryStats =
+  await prisma.post.groupBy({
+    by: ["category"],
+    _count: {
+      category: true,
+    },
+  });
+
+  const categoryViews =
+  await prisma.post.groupBy({
+    by: ["category"],
+    _sum: {
+      views: true,
+    },
+  });
+
+  const allPosts =
+  await prisma.post.findMany({
+    select: {
+      createdAt: true,
+    },
+  });
+
+const monthlyPosts = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+].map((month, index) => ({
+  month,
+  posts: allPosts.filter(
+    (post) =>
+      new Date(
+        post.createdAt
+      ).getMonth() === index
+  ).length,
+}));
+
       res.status(200).json({
         success: true,
         totalUsers,
@@ -58,6 +104,9 @@ const mostViewedPost =
         publishedPosts,
         draftPosts,
         mostViewedPost,
+        categoryStats,
+        categoryViews,
+        monthlyPosts,
       });
     }
   );

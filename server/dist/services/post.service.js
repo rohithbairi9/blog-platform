@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.incrementPostViewsService = exports.deletePostService = exports.updatePostService = exports.getPostByIdService = exports.getPostBySlugService = exports.getAllPostsService = exports.createPostService = void 0;
+exports.getRelatedPostsService = exports.incrementPostViewsService = exports.deletePostService = exports.updatePostService = exports.getPostByIdService = exports.getPostBySlugService = exports.getAllPostsService = exports.createPostService = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
 const generateSlug_1 = __importDefault(require("../utils/generateSlug"));
 const AppError_1 = __importDefault(require("../utils/AppError"));
@@ -31,24 +31,26 @@ const createPostService = async (data) => {
     });
 };
 exports.createPostService = createPostService;
-const getAllPostsService = async (page, limit, search) => {
+const getAllPostsService = async (page, limit, search, category) => {
     const skip = (page - 1) * limit;
-    const where = search
-        ? {
-            OR: [
-                {
-                    title: {
-                        contains: search,
-                    },
+    const where = {};
+    if (search) {
+        where.OR = [
+            {
+                title: {
+                    contains: search,
                 },
-                {
-                    content: {
-                        contains: search,
-                    },
+            },
+            {
+                content: {
+                    contains: search,
                 },
-            ],
-        }
-        : {};
+            },
+        ];
+    }
+    if (category) {
+        where.category = category;
+    }
     const posts = await prisma_1.default.post.findMany({
         where,
         skip,
@@ -142,3 +144,26 @@ const incrementPostViewsService = async (slug) => {
     });
 };
 exports.incrementPostViewsService = incrementPostViewsService;
+const getRelatedPostsService = async (postId, category) => {
+    return prisma_1.default.post.findMany({
+        where: {
+            id: {
+                not: postId,
+            },
+            category,
+        },
+        take: 3,
+        include: {
+            author: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
+exports.getRelatedPostsService = getRelatedPostsService;

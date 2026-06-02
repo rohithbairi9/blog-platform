@@ -88,3 +88,16 @@ export const getMyPosts =
 
     return response.data;
   };
+
+export const getRelatedPosts =
+  async (
+    postId: string,
+    category: string
+  ) => {
+    const response =
+      await api.get(
+        `/posts/related/${postId}?category=${category}`
+      );
+
+    return response.data;
+  };

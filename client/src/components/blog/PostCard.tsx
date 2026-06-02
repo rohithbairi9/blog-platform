@@ -54,11 +54,18 @@ export default function PostCard({
   </div>
 )}
 
-      <p className="text-gray-600 mb-4 line-clamp-3">
+      {/* <p className="text-gray-600 mb-4 line-clamp-3">
   {content.length > 120
     ? `${content.slice(0, 120)}...`
     : content}
-</p>
+</p> */}
+
+<div
+  className="text-gray-600 mb-4 line-clamp-3"
+  dangerouslySetInnerHTML={{
+    __html: content,
+  }}
+/>
 
       {tags && tags.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-4">

@@ -9,6 +9,9 @@ import {
   registerSchema,
   loginSchema,
 } from "../validators/auth.validator";
+import { v4 as uuidv4 } from "uuid";
+import sendEmail from "../utils/sendEmail";
+import crypto from "crypto";
 
 export const registerUser = async (
   req: Request,
@@ -38,13 +41,36 @@ export const registerUser = async (
     const hashedPassword =
       await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
+   const verificationToken =
+  uuidv4();
+
+const user = await prisma.user.create({
+  data: {
+    name,
+    email,
+    password: hashedPassword,
+
+    verified: false,
+    verificationToken,
+  },
+});
+
+const verificationUrl =
+  `http://localhost:5000/api/auth/verify/${verificationToken}`;
+
+await sendEmail(
+  email,
+  "Verify Your Account",
+  `
+    <h2>Welcome to Blog Platform</h2>
+
+    <p>Click the link below to verify your account:</p>
+
+    <a href="${verificationUrl}">
+      Verify Account
+    </a>
+  `
+);
 
     const token = generateToken(user.id);
 
@@ -96,6 +122,14 @@ export const loginUser = async (
         message: "Invalid credentials",
       });
     }
+
+    if (!user.verified) {
+  return res.status(401).json({
+    success: false,
+    message:
+      "Please verify your email first",
+  });
+}
 
     const isPasswordCorrect =
       await bcrypt.compare(
@@ -186,4 +220,151 @@ export const getMe = async (
       message: error.message,
     });
   }
+};
+export const verifyEmail = async (
+  req: Request,
+  res: Response
+) => {
+  const token = req.params.token as string;
+
+  const user =
+    await prisma.user.findFirst({
+      where: {
+        verificationToken: token,
+      },
+    });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid token",
+    });
+  }
+
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      verified: true,
+      verificationToken: null,
+    },
+  });
+
+  return res.json({
+    success: true,
+    message:
+      "Email verified successfully",
+  });
+};
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+) => {
+  const { email } = req.body;
+
+  const user =
+    await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  const resetToken =
+    crypto.randomBytes(32).toString("hex");
+
+  const resetPasswordExpiry =
+    new Date(
+      Date.now() + 15 * 60 * 1000
+    );
+
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      resetPasswordToken:
+        resetToken,
+      resetPasswordExpiry,
+    },
+  });
+
+  const resetUrl =
+    `http://localhost:3000/reset-password/${resetToken}`;
+
+  await sendEmail(
+    user.email,
+    "Reset Your Password",
+    `
+      <h2>Password Reset</h2>
+
+      <p>
+        Click the link below to reset your password:
+      </p>
+
+      <a href="${resetUrl}">
+        Reset Password
+      </a>
+    `
+  );
+
+  return res.json({
+    success: true,
+    message:
+      "Password reset email sent",
+  });
+};
+
+export const resetPassword = async (
+  req: Request,
+  res: Response
+) => {
+  const token = req.params.token as string;
+
+  const { password } = req.body;
+
+  const user =
+    await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpiry: {
+          gt: new Date(),
+        },
+      },
+    });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid or expired token",
+    });
+  }
+
+  const hashedPassword =
+    await bcrypt.hash(password, 10);
+
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpiry: null,
+    },
+  });
+
+  return res.json({
+    success: true,
+    message:
+      "Password reset successfully",
+  });
 };

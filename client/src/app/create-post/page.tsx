@@ -30,6 +30,10 @@ export default function CreatePostPage() {
   ],
 };
 
+const [category, setCategory] = useState("");
+
+const [tags, setTags] = useState("");
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-4xl font-bold mb-6">
@@ -46,6 +50,11 @@ await createPost({
   title,
   content,
   coverImage,
+  category,
+  tags: tags
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean),
 });
 
       alert("Post created successfully");
@@ -73,6 +82,26 @@ await createPost({
   value={coverImage}
   onChange={(e) =>
     setCoverImage(e.target.value)
+  }
+  className="w-full border p-3 rounded"
+/>
+
+<input
+  type="text"
+  placeholder="Category"
+  value={category}
+  onChange={(e) =>
+    setCategory(e.target.value)
+  }
+  className="w-full border p-3 rounded"
+/>
+
+<input
+  type="text"
+  placeholder="Tags (comma separated)"
+  value={tags}
+  onChange={(e) =>
+    setTags(e.target.value)
   }
   className="w-full border p-3 rounded"
 />

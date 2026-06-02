@@ -12,5 +12,6 @@ const admin_middleware_1 = __importDefault(require("../middlewares/admin.middlew
 const router = (0, express_1.Router)();
 router.get("/profile", auth_middleware_1.default, user_controller_2.getProfile);
 router.put("/profile", auth_middleware_1.default, user_controller_2.updateProfile);
+router.get("/:id", user_controller_2.getUserById);
 router.put("/make-admin/:userId", auth_middleware_1.default, admin_middleware_1.default, user_controller_1.makeAdmin);
 exports.default = router;

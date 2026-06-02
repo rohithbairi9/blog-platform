@@ -10,6 +10,7 @@ import {
   getMyPosts,
   updatePost,
   deletePost,
+  getRelatedPosts,
 } from "../controllers/post.controller";
 
 import { getCommentsByPost }
@@ -30,6 +31,8 @@ router.get("/", getAllPosts);
 router.get("/id/:id", getPostById);
 
 router.get("/:postId/comments", getCommentsByPost);
+
+router.get("/related/:postId", getRelatedPosts);
 
 router.get("/:slug", getPostBySlug);
 

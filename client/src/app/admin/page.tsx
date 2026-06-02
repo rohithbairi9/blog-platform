@@ -14,6 +14,20 @@ import {
   togglePublishPost,
 } from "@/services/admin.service";
 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+
 export default function AdminPage() {
 
     const {user, loading,} = useAuth();
@@ -204,6 +218,33 @@ const filteredPosts =
       )
   );
 
+const categoryChartData =
+  stats?.categoryStats?.map(
+    (item: any) => ({
+      name:
+        item.category ||
+        "Uncategorized",
+
+      posts:
+        item._count.category,
+    })
+  ) || [];
+
+const categoryViewsData =
+  stats?.categoryViews?.map(
+    (item: any) => ({
+      name:
+        item.category ||
+        "Uncategorized",
+
+      views:
+        item._sum.views || 0,
+    })
+  ) || [];
+
+  const monthlyPostsData =
+  stats?.monthlyPosts || [];
+
   if (loading) {
   return (
     <div className="p-10">
@@ -222,6 +263,31 @@ if (
     </div>
   );
 }
+
+const chartData = [
+  {
+    name: "Users",
+    value: stats?.totalUsers || 0,
+  },
+  {
+    name: "Posts",
+    value: stats?.totalPosts || 0,
+  },
+  {
+    name: "Comments",
+    value: stats?.totalComments || 0,
+  },
+  {
+    name: "Likes",
+    value: stats?.totalLikes || 0,
+  },
+  {
+    name: "Bookmarks",
+    value: stats?.totalBookmarks || 0,
+  },
+];
+
+
 
   if (!stats) {
     return (
@@ -301,6 +367,126 @@ if (
   </p>
 </div>
       </div>
+
+      <div className="border rounded-lg p-6 mb-8">
+  <h2 className="text-2xl font-bold mb-4">
+    Platform Analytics
+  </h2>
+
+  <div className="h-80">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <BarChart data={chartData}>
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+
+        <Bar
+          dataKey="value"
+          fill="#3b82f6"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
+<div className="border rounded-lg p-6 mb-8">
+  <h2 className="text-2xl font-bold mb-4">
+    Posts By Category
+  </h2>
+
+  <div className="h-96">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <PieChart>
+        <Pie
+          data={categoryChartData}
+          dataKey="posts"
+          nameKey="name"
+          outerRadius={120}
+          label
+        >
+          {categoryChartData.map(
+            (
+              _: any,
+              index: number
+            ) => (
+              <Cell
+                key={index}
+                fill={[
+                  "#3b82f6",
+                  "#10b981",
+                  "#f59e0b",
+                  "#ef4444",
+                  "#8b5cf6",
+                ][index % 5]}
+              />
+            )
+          )}
+        </Pie>
+
+        <Tooltip />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
+<div className="border rounded-lg p-6 mb-8">
+  <h2 className="text-2xl font-bold mb-4">
+    Views By Category
+  </h2>
+
+  <div className="h-80">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <BarChart
+        data={categoryViewsData}
+      >
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+
+        <Bar
+          dataKey="views"
+          fill="#10b981"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
+<div className="border rounded-lg p-6 mb-8">
+  <h2 className="text-2xl font-bold mb-4">
+    Monthly Post Creation
+  </h2>
+
+  <div className="h-80">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <BarChart
+        data={monthlyPostsData}
+      >
+        <XAxis dataKey="month" />
+        <YAxis />
+        <Tooltip />
+
+        <Bar
+          dataKey="posts"
+          fill="#8b5cf6"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
 
       <div className="border rounded-lg mb-8">
   <div className="p-4 border-b">

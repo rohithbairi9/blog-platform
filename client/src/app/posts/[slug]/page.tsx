@@ -15,6 +15,11 @@ import {
   toggleLike,
 } from "@/services/like.service";
 import { toggleBookmark } from "@/services/bookmark.service";
+import {
+  getRelatedPosts,
+} from "@/services/post.service";
+
+import PostCard from "@/components/blog/PostCard";
 
 export default function SinglePostPage() {
   const params = useParams();
@@ -26,6 +31,8 @@ export default function SinglePostPage() {
   const [commentText, setCommentText] = useState("");
 
   const [likesCount, setLikesCount] = useState(0);
+
+  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -54,6 +61,17 @@ const likesData =
 setLikesCount(
   likesData.likesCount
 );
+
+const relatedData =
+  await getRelatedPosts(
+    data.post.id,
+    data.post.category || ""
+  );
+
+setRelatedPosts(
+  relatedData.posts
+);
+
       } catch (error) {
         console.error(error);
       }
@@ -265,6 +283,30 @@ return (
     Add Comment
   </button>
 </form>
+
+<div className="mt-12">
+  <h2 className="text-3xl font-bold mb-6">
+    Related Posts
+  </h2>
+
+  <div className="grid gap-6">
+    {relatedPosts.map((post) => (
+      <PostCard
+        key={post.id}
+        id={post.id}
+        title={post.title}
+        slug={post.slug}
+        content={post.content}
+        author={post.author.name}
+        authorId={post.author.id}
+        coverImage={post.coverImage}
+        category={post.category}
+        tags={post.tags}
+        views={post.views}
+      />
+    ))}
+  </div>
+</div>
 
     </div>
   );

@@ -16,6 +16,7 @@ const like_routes_1 = __importDefault(require("./routes/like.routes"));
 const bookmark_routes_1 = __importDefault(require("./routes/bookmark.routes"));
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const upload_routes_1 = __importDefault(require("./routes/upload.routes"));
+const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -30,6 +31,7 @@ app.use("/api/comments", comment_routes_1.default);
 app.use("/api/likes", like_routes_1.default);
 app.use("/api/bookmarks", bookmark_routes_1.default);
 app.use("/api/users", user_routes_1.default);
+app.use("/api/admin", admin_routes_1.default);
 app.use("/api/upload", upload_routes_1.default);
 app.use(error_middleware_1.default);
 app.get("/", (_req, res) => {

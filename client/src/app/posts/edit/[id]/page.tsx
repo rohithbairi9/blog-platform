@@ -26,6 +26,10 @@ export default function EditPostPage() {
   const [content, setContent] =
     useState("");
 
+  const [category, setCategory] = useState("");
+
+const [tags, setTags] = useState("");
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -35,9 +39,10 @@ export default function EditPostPage() {
           );
 
         setTitle(data.post.title);
-        setContent(
-          data.post.content
-        );
+        setContent(data.post.content);
+        setCategory(data.post.category || "");
+        setTags(data.post.tags?.join(", ") || "");
+
       } catch (error) {
         console.error(error);
       }
@@ -72,12 +77,18 @@ export default function EditPostPage() {
 
           try {
             await updatePost(
-              params.id as string,
-              {
-                title,
-                content,
-              }
-            );
+  params.id as string,
+  {
+    title,
+    content,
+    category,
+
+    tags: tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+  }
+);
 
             alert(
               "Post updated successfully"
@@ -101,6 +112,26 @@ export default function EditPostPage() {
           }
           className="w-full border p-3 rounded"
         />
+
+        <input
+  type="text"
+  placeholder="Category"
+  value={category}
+  onChange={(e) =>
+    setCategory(e.target.value)
+  }
+  className="w-full border p-3 rounded"
+/>
+
+<input
+  type="text"
+  placeholder="Tags (comma separated)"
+  value={tags}
+  onChange={(e) =>
+    setTags(e.target.value)
+  }
+  className="w-full border p-3 rounded"
+/>
 
         {/* <textarea
           rows={10}

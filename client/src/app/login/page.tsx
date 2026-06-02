@@ -25,10 +25,14 @@ await loginUser({
 alert("Login successful");
 
 window.location.href = "/";
-  } catch (error) {
-    console.error(error);
-    alert("Login failed");
-  }
+  } catch (error: any) {
+  console.error(error);
+
+  alert(
+    error?.response?.data?.message ||
+    "Login failed"
+  );
+}
 };
 
   return (
@@ -67,6 +71,16 @@ window.location.href = "/";
         >
           Login
         </button>
+
+        <p className="mt-4 text-center">
+  <a
+    href="/forgot-password"
+    className="text-blue-600"
+  >
+    Forgot Password?
+  </a>
+</p>
+
                 <p className="mt-4 text-center">
   Don't have an account?{" "}
   <Link

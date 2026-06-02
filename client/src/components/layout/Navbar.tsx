@@ -1,15 +1,45 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import { logoutUser } from "@/services/auth.service";
 
 export default function Navbar() {
   const pathname = usePathname();
 
-  const { user, loading, isAuthenticated } =
+const [theme, setTheme] =
+  useState("light");
+
+useEffect(() => {
+  const savedTheme =
+    localStorage.getItem("theme") ||
+    "light";
+
+  setTheme(savedTheme);
+}, []);
+
+const toggleTheme = () => {
+  const newTheme =
+    theme === "light"
+      ? "dark"
+      : "light";
+
+  setTheme(newTheme);
+
+  localStorage.setItem(
+    "theme",
+    newTheme
+  );
+
+  document.documentElement.setAttribute(
+    "data-theme",
+    newTheme
+  );
+};
+
+const { user, loading, isAuthenticated } =
   useAuth();
 
   return (
@@ -34,6 +64,10 @@ export default function Navbar() {
   Home
 </Link>
 
+<Link href="/categories">
+  Categories
+</Link>
+
 <Link href="/create-post">
   Create Post
 </Link>
@@ -41,6 +75,15 @@ export default function Navbar() {
 <Link href="/bookmarks">
   Bookmarks
 </Link>
+
+<button
+  onClick={toggleTheme}
+  className="border px-3 py-1 rounded"
+>
+  {theme === "light"
+    ? "🌙"
+    : "☀️"}
+</button>
 
 {!loading && !isAuthenticated ? (
   <>
