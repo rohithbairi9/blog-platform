@@ -1,4 +1,5 @@
 import Link from "next/link";
+import useAuth from "@/hooks/useAuth";
 
 interface PostCardProps {
   id: string;
@@ -29,30 +30,31 @@ export default function PostCard({
   tags,
   views,
 }: PostCardProps) {
+
+  const { user } = useAuth();
+
   return (
     <div className="border rounded-lg p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-{coverImage ? (
-  <img
-  src={coverImage}
-  alt={title}
-  className="w-full h-56 object-cover rounded mb-4 transition-transform duration-300 hover:scale-[1.02]"
-/>
-) : (
-  <div className="w-full h-56 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500">
-    No Cover Image
-  </div>
-)}
+      {coverImage &&
+        !coverImage.includes("your-image.jpg") ? (
+        <img
+          src={coverImage}
+          alt={title}
+        />
+      ) : (
+        <div>No Cover Image</div>
+      )}
       <h2 className="text-2xl font-bold mb-2">
         {title}
       </h2>
 
       {category && (
-  <div className="mb-3">
-    <span className="bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full">
-      Category: {category}
-    </span>
-  </div>
-)}
+        <div className="mb-3">
+          <span className="bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full">
+            Category: {category}
+          </span>
+        </div>
+      )}
 
       {/* <p className="text-gray-600 mb-4 line-clamp-3">
   {content.length > 120
@@ -60,12 +62,12 @@ export default function PostCard({
     : content}
 </p> */}
 
-<div
-  className="text-gray-600 mb-4 line-clamp-3"
-  dangerouslySetInnerHTML={{
-    __html: content,
-  }}
-/>
+      <div
+        className="text-gray-600 mb-4 line-clamp-3"
+        dangerouslySetInnerHTML={{
+          __html: content,
+        }}
+      />
 
       {tags && tags.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-4">
@@ -82,33 +84,35 @@ export default function PostCard({
 
       <div className="flex justify-between items-center">
         <div>
-<Link
-  href={`/author/${authorId}`}
-  className="text-sm text-gray-500 hover:text-blue-600 hover:underline"
->
-  By {author}
-</Link>
+          <Link
+            href={`/author/${authorId}`}
+            className="text-sm text-gray-500 hover:text-blue-600 hover:underline"
+          >
+            By {author}
+          </Link>
 
-  <p className="text-sm text-gray-500">
-    👁 {views ?? 0} views
-  </p>
-</div>
+          <p className="text-sm text-gray-500">
+            👁 {views ?? 0} views
+          </p>
+        </div>
 
-<div className="flex gap-2">
-  <Link
-    href={`/posts/${slug}`}
-    className="border px-4 py-2 rounded"
-  >
-    Read More
-  </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/posts/${slug}`}
+            className="border px-4 py-2 rounded"
+          >
+            Read More
+          </Link>
 
+          {user?.id === authorId && (
   <Link
     href={`/posts/edit/${id}`}
     className="border px-4 py-2 rounded"
   >
     Edit
   </Link>
-</div>
+)}
+        </div>
       </div>
     </div>
   );

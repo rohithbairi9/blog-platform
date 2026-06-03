@@ -41,7 +41,7 @@ export const registerUser = async (
     const hashedPassword =
       await bcrypt.hash(password, 10);
 
-   const verificationToken =
+const verificationToken =
   uuidv4();
 
 const user = await prisma.user.create({
@@ -56,7 +56,7 @@ const user = await prisma.user.create({
 });
 
 const verificationUrl =
-  `http://localhost:5000/api/auth/verify/${verificationToken}`;
+  `http://localhost:3000/verify-email?token=${verificationToken}`;
 
 await sendEmail(
   email,
@@ -83,7 +83,8 @@ await sendEmail(
 
     return res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message:
+  "Registration successful. Please check your email to verify your account.",
       user: {
         id: user.id,
         name: user.name,
@@ -251,11 +252,10 @@ export const verifyEmail = async (
     },
   });
 
-  return res.json({
-    success: true,
-    message:
-      "Email verified successfully",
-  });
+return res.status(200).json({
+  success: true,
+  message: "Email verified successfully",
+});
 };
 export const forgotPassword = async (
   req: Request,

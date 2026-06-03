@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createPost } from "@/services/post.service";
 import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
+import api from "@/lib/axios";
 
 const ReactQuill = dynamic(
   () => import("react-quill-new"),
@@ -14,8 +15,6 @@ export default function CreatePostPage() {
   const [title, setTitle] = useState("");
 
   const [content, setContent] = useState("");
-
-  const [coverImage, setCoverImage] = useState("");
 
   const modules = {
   toolbar: [
@@ -34,6 +33,9 @@ const [category, setCategory] = useState("");
 
 const [tags, setTags] = useState("");
 
+const [file, setFile] =
+  useState<File | null>(null);
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-4xl font-bold mb-6">
@@ -45,22 +47,49 @@ const [tags, setTags] = useState("");
   onSubmit={async (e) => {
     e.preventDefault();
 
-    try {
-await createPost({
-  title,
-  content,
-  coverImage,
-  category,
-  tags: tags
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean),
-});
+try {
+  let uploadedImageUrl = "";
 
-      alert("Post created successfully");
+  if (file) {
+    const formData = new FormData();
 
-      window.location.href = "/";
-    } catch (error) {
+    formData.append(
+      "image",
+      file
+    );
+
+    const uploadResponse =
+      await api.post(
+        "/upload/image",
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
+      );
+
+    uploadedImageUrl =
+      uploadResponse.data.imageUrl;
+  }
+
+  await createPost({
+    title,
+    content,
+    coverImage:
+      uploadedImageUrl,
+    category,
+    tags: tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+  });
+
+  alert("Post created successfully");
+
+  window.location.href = "/";
+} catch (error) {
       console.error(error);
       alert("Failed to create post");
     }
@@ -77,13 +106,14 @@ await createPost({
         />
 
         <input
-  type="text"
-  placeholder="Cover Image URL"
-  value={coverImage}
-  onChange={(e) =>
-    setCoverImage(e.target.value)
-  }
-  className="w-full border p-3 rounded"
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    if (e.target.files?.[0]) {
+      setFile(e.target.files[0]);
+    }
+  }}
+  className="w-full border p-3 mb-4"
 />
 
 <input

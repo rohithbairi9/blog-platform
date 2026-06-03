@@ -46,15 +46,28 @@ export const registerUser = async (
   return response.data;
 };
 
+import axios from "axios";
+
 export const loginUser = async (
   data: LoginData
 ) => {
-  const response = await api.post(
-    "/auth/login",
-    data
-  );
+  try {
+    const response = await api.post(
+      "/auth/login",
+      data
+    );
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message ||
+        "Login failed"
+      );
+    }
+
+    throw new Error("Something went wrong");
+  }
 };
 
 export const getProfile =

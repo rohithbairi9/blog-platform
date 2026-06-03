@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { loginUser } from "@/services/auth.service";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] =
@@ -10,6 +11,14 @@ export default function LoginPage() {
 
   const [password, setPassword] =
     useState("");
+
+  const [error, setError] = useState("");
+
+  const searchParams =
+  useSearchParams();
+
+const verified =
+  searchParams.get("verified");
 
 const handleSubmit = async (
   e: React.FormEvent
@@ -25,13 +34,8 @@ await loginUser({
 alert("Login successful");
 
 window.location.href = "/";
-  } catch (error: any) {
-  console.error(error);
-
-  alert(
-    error?.response?.data?.message ||
-    "Login failed"
-  );
+} catch (error: any) {
+  alert(error.message);
 }
 };
 
@@ -44,6 +48,19 @@ window.location.href = "/";
         <h1 className="text-3xl font-bold mb-6">
           Login
         </h1>
+
+        {error && (
+  <div className="mb-4 p-3 bg-red-100 text-red-600 rounded">
+    {error}
+  </div>
+)}
+
+        {verified && (
+  <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
+    Email verified successfully.
+    Please login.
+  </div>
+)}
 
         <input
           type="email"

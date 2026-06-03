@@ -28,7 +28,9 @@ await registerUser({
   password,
 });
 
-alert("Registration successful");
+alert(
+  "Registration successful. Check your email and verify your account before logging in."
+);
 
 window.location.href = "/login";
 

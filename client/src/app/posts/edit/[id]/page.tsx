@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
+import useAuth from "@/hooks/useAuth";
+import { uploadImage } from "@/services/upload.service";
 
 import {
   getPostById,
@@ -20,6 +22,8 @@ const ReactQuill = dynamic(
 export default function EditPostPage() {
   const params = useParams();
 
+const { user, loading } = useAuth();
+
   const [title, setTitle] =
     useState("");
 
@@ -28,28 +32,83 @@ export default function EditPostPage() {
 
   const [category, setCategory] = useState("");
 
+  const [coverImage, setCoverImage] =
+  useState("");
+
 const [tags, setTags] = useState("");
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const data =
-          await getPostById(
-            params.id as string
-          );
+useEffect(() => {
+  if (loading) return;
 
-        setTitle(data.post.title);
-        setContent(data.post.content);
-        setCategory(data.post.category || "");
-        setTags(data.post.tags?.join(", ") || "");
+  if (!user) {
+    window.location.href = "/login";
+    return;
+  }
 
-      } catch (error) {
-        console.error(error);
-      }
-    };
+//   const fetchPost = async () => {
+//       try {
+// const data =
+//   await getPostById(
+//     params.id as string
+//   );
+
+// if (
+//   user &&
+//   data.post.author.id !== user.id
+// ) {
+//   alert(
+//     "You are not allowed to edit this post"
+//   );
+
+//   window.location.href = "/";
+
+//   return;
+// }
+
+// setTitle(data.post.title);
+// setContent(data.post.content);
+// setCategory(data.post.category || "");
+// setTags(data.post.tags?.join(", ") || "");
+
+//       } catch (error) {
+//         console.error(error);
+//       }
+//     };
+
+const fetchPost = async () => {
+  try {
+    const data = await getPostById(
+      params.id as string
+    );
+
+    if (
+      user &&
+      data.post.author.id !== user.id
+    ) {
+      console.log(
+  "You are not allowed to edit this post"
+);
+
+      window.location.href = "/";
+      return;
+    }
+
+    setTitle(data.post.title);
+    setContent(data.post.content);
+    setCategory(data.post.category || "");
+    setCoverImage(
+  data.post.coverImage || ""
+);
+    setTags(
+      data.post.tags?.join(", ") || ""
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
 
     fetchPost();
-  }, [params.id]);
+}, [params.id, user, loading]);
 
   const modules = {
   toolbar: [
@@ -64,6 +123,33 @@ const [tags, setTags] = useState("");
   ],
 };
 
+if (loading) {
+  return (
+    <div className="p-10">
+      Loading...
+    </div>
+  );
+}
+
+const handleImageUpload = async (
+  file: File
+) => {
+  try {
+    const data =
+      await uploadImage(file);
+
+    setCoverImage(
+      data.imageUrl
+    );
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Image upload failed"
+    );
+  }
+};
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-4xl font-bold mb-6">
@@ -76,11 +162,12 @@ const [tags, setTags] = useState("");
           e.preventDefault();
 
           try {
-            await updatePost(
+await updatePost(
   params.id as string,
   {
     title,
     content,
+    coverImage,
     category,
 
     tags: tags
@@ -122,6 +209,28 @@ const [tags, setTags] = useState("");
   }
   className="w-full border p-3 rounded"
 />
+
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file =
+      e.target.files?.[0];
+
+    if (file) {
+      handleImageUpload(file);
+    }
+  }}
+  className="w-full border p-3 rounded"
+/>
+
+{coverImage && (
+  <img
+    src={coverImage}
+    alt="Preview"
+    className="w-full h-60 object-cover rounded"
+  />
+)}
 
 <input
   type="text"

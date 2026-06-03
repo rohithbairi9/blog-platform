@@ -130,11 +130,29 @@ export const getPostBySlugService =
     });
   };
 
+// export const getPostByIdService =
+//   async (id: string) => {
+//     return prisma.post.findUnique({
+//       where: {
+//         id,
+//       },
+//     });
+//   };
+
 export const getPostByIdService =
   async (id: string) => {
     return prisma.post.findUnique({
       where: {
         id,
+      },
+
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   };
