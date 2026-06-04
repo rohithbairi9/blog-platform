@@ -201,6 +201,7 @@ return (
 </div> */}
 
 <div
+  className="prose max-w-none mt-6"
   dangerouslySetInnerHTML={{
     __html: post.content,
   }}

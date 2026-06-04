@@ -151,7 +151,7 @@ try {
   value={content}
   onChange={setContent}
   modules={modules}
-  className="bg-white"
+  className="bg-white h-64 mb-16"
 />
 
         <button
